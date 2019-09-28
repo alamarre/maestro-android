@@ -19,10 +19,10 @@ jobs:
         MAESTRO_DEVICE_NAME: office-fire-tv
         MAESTRO_APP_NAME: Maestro Media Center
         MAESTRO_APP_ID: ca.omny.videos.maestro
-      run: ./gradlew build
+      run: ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./office-maestro.apk
     - name: Upload binary to S3 bucket
       uses: tpaschalis/s3-sync-action@master
-      with:
+      with: ./office-maestro.apk
        args: --acl public-read
       env:
         FILE: ./app/build/outputs/apk/debug/app-debug.apk
