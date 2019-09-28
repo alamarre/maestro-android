@@ -17,6 +17,6 @@ jobs:
       env:
         MAESTRO_TOKEN: ${{ secrets.AL_MAESTRO_TOKEN }}
         MAESTRO_DEVICE_NAME: office-fire-tv
-        MAESTRO_APP_NAME=Maestro Media Center
-        MAESTRO_APP_ID=ca.omny.videos.maestro
+        MAESTRO_APP_NAME: Maestro Media Center
+        MAESTRO_APP_ID: ca.omny.videos.maestro
       run: ./gradlew build
