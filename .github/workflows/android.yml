@@ -15,7 +15,7 @@ jobs:
         java-version: 1.8
     - name: Build with Gradle
       env:
-        ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ join(['"', secrets.AL_MAESTRO_TOKEN, '"']) }}
+        ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.AL_MAESTRO_TOKEN) }}
         ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: "office-fire-tv"
         ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Maestro Media Center"
         ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro"
