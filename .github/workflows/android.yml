@@ -17,8 +17,8 @@ jobs:
       env:
         ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.AL_MAESTRO_TOKEN) }}
         ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"office-fire-tv"'
-        ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: '"Maestro Media Center"'
-        ORG_GRADLE_PROJECT_MAESTRO_APP_ID: '"ca.omny.videos.maestro"'
+        ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: 'Maestro Media Center'
+        ORG_GRADLE_PROJECT_MAESTRO_APP_ID: 'ca.omny.videos.maestro'
       run: 
         ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./office-maestro.apk
       
