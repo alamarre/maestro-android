@@ -29,9 +29,17 @@ jobs:
         ORG_GRADLE_PROJECT_MAESTRO_APP_ID: 'ca.omny.videos.maestro'
       run:
         ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./fire-tv-auto-maestro.apk
+    - name: Build for basement
+      env:
+        ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.AL_MAESTRO_TOKEN) }}
+        ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"ye-olde-fire-tv"'
+        ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: 'Maestro Media Center'
+        ORG_GRADLE_PROJECT_MAESTRO_APP_ID: 'ca.omny.videos.maestro'
+      run:
+        ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./ye-olde-fire-tv-maestro.apk
       
       
-    - name: Upload binary to S3 bucket
+    - name: Upload for office
       uses: tpaschalis/s3-sync-action@master
       with: 
        args: --acl public-read
@@ -42,7 +50,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         
-    - name: Upload second binary to S3 bucket
+    - name: Upload for bedroom
       uses: tpaschalis/s3-sync-action@master
       with: 
        args: --acl public-read
@@ -52,3 +60,15 @@ jobs:
         AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      
+     - name: Upload for basement
+      uses: tpaschalis/s3-sync-action@master
+      with: 
+       args: --acl public-read
+      env:
+        FILE: ./ye-olde-fire-tv.apk
+        AWS_REGION: 'us-east-1'
+        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        
