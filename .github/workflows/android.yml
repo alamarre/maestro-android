@@ -20,7 +20,7 @@ jobs:
         ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: 'Maestro Media Center'
         ORG_GRADLE_PROJECT_MAESTRO_APP_ID: 'ca.omny.videos.maestro'
       run: 
-        - ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./office-maestro.apk
+        ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./office-maestro.apk
     - name: Build for bedroom
       env:
         ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.AL_MAESTRO_TOKEN) }}
@@ -28,7 +28,7 @@ jobs:
         ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: 'Maestro Media Center'
         ORG_GRADLE_PROJECT_MAESTRO_APP_ID: 'ca.omny.videos.maestro'
       run:
-        - ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./fire-tv-auto-maestro.apk
+        ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./fire-tv-auto-maestro.apk
       
       
     - name: Upload binary to S3 bucket
