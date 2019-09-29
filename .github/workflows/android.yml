@@ -47,8 +47,8 @@ jobs:
         ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: 'Maestro Media Center'
         ORG_GRADLE_PROJECT_MAESTRO_APP_ID: 'ca.omny.videos.maestro'
         ORG_GRADLE_PROJECT_MAESTRO_PROFILE: '"Deb"'
-       run:
-         ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./mom-fire-tv-maestro.apk
+      run:
+        ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./mom-fire-tv-maestro.apk
       
       
     - name: Upload for office
