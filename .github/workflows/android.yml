@@ -20,7 +20,8 @@ jobs:
         ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: 'Maestro Media Center'
         ORG_GRADLE_PROJECT_MAESTRO_APP_ID: 'ca.omny.videos.maestro'
       run: 
-        ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./office-maestro.apk
+        - ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./office-maestro.apk
+        - ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME='"fire-tv-auto"'./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./fire-tv-auto-maestro.apk
       
       
     - name: Upload binary to S3 bucket
@@ -29,6 +30,17 @@ jobs:
        args: --acl public-read
       env:
         FILE: ./office-maestro.apk
+        AWS_REGION: 'us-east-1'
+        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        
+    - name: Upload second binary to S3 bucket
+      uses: tpaschalis/s3-sync-action@master
+      with: 
+       args: --acl public-read
+      env:
+        FILE: ./fire-tv-auto-maestro.apk
         AWS_REGION: 'us-east-1'
         AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
