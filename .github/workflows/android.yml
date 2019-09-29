@@ -13,7 +13,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Build with Gradle
+    - name: Build for office
       env:
         ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.AL_MAESTRO_TOKEN) }}
         ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"office-fire-tv"'
@@ -21,7 +21,14 @@ jobs:
         ORG_GRADLE_PROJECT_MAESTRO_APP_ID: 'ca.omny.videos.maestro'
       run: 
         - ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./office-maestro.apk
-        - ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME='"fire-tv-auto"'./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./fire-tv-auto-maestro.apk
+    - name: Build for bedroom
+      env:
+        ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.AL_MAESTRO_TOKEN) }}
+        ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"fire-tv-auto"'
+        ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: 'Maestro Media Center'
+        ORG_GRADLE_PROJECT_MAESTRO_APP_ID: 'ca.omny.videos.maestro'
+      run:
+        - './gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./fire-tv-auto-maestro.apk
       
       
     - name: Upload binary to S3 bucket
