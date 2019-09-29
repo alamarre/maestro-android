@@ -72,8 +72,8 @@ public class WebActivity extends Activity {
         mWebview.getSettings().setDatabaseEnabled(true);
         mWebview.getSettings().setAppCacheEnabled(true);
         mWebview.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        if(! "http://192.168.86.152:8081".equals(mWebview.getUrl())) {
-            mWebview.loadUrl("http://192.168.86.152:8081");
+        if(! BuildConfig.MAESTRO_URL.equals(mWebview.getUrl())) {
+            mWebview.loadUrl(BuildConfig.MAESTRO_URL);
         }
 
 
