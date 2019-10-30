@@ -1,9 +1,7 @@
-package ca.omny.videos.maestroandroid;
+package ca.omny.videos.maestro;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebResourceError;
