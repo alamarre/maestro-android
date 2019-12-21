@@ -24,11 +24,11 @@ public class WebActivity extends Activity {
             final Activity activity = this;
 
             mWebview.setWebViewClient(new WebViewClient() {
-                @SuppressWarnings("deprecation")
+                /*@SuppressWarnings("deprecation")
                 @Override
                 public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                    Toast.makeText(activity, description, Toast.LENGTH_SHORT).show();
-                }
+                    //Toast.makeText(activity, description, Toast.LENGTH_SHORT).show();
+                }*/
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     mWebview.evaluateJavascript("if(window.location.hash == '#/login') {" +
