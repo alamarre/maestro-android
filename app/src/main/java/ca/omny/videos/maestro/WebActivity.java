@@ -3,6 +3,7 @@ package ca.omny.videos.maestro;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -14,6 +15,32 @@ import android.widget.Toast;
 public class WebActivity extends Activity {
 
     private WebView mWebview;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+        boolean handled = false;
+
+        switch (keyCode){
+            case KeyEvent.KEYCODE_MENU:
+                // ... handle left action
+                mWebview.evaluateJavascript("var event = document.createEvent('Event');" +
+                                "event.initEvent('keydown', true, true);" +
+                                "event.keyCode = 77;" +
+                                "document.dispatchEvent(event);", null);
+                handled = true;
+                break;
+            case KeyEvent.KEYCODE_BACK:
+                // ... handle right action
+                if(mWebview.canGoBack()) {
+                    mWebview.goBack();
+
+                    handled = true;
+                }
+                break;
+        }
+        return handled || super.onKeyDown(keyCode, event);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,24 +56,6 @@ public class WebActivity extends Activity {
                 public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                     //Toast.makeText(activity, description, Toast.LENGTH_SHORT).show();
                 }*/
-                @Override
-                public void onPageFinished(WebView view, String url) {
-                    mWebview.evaluateJavascript("if(window.location.hash == '#/login') {" +
-                            "function setCookie(cname, cvalue, exdays) { " +
-                            "var d = new Date(); d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));" +
-                            "var expires = \"expires=\" + d.toGMTString();" +
-                            "document.cookie = cname + \"=\" + cvalue + \"; \" + expires;" +
-                            "}" +
-                            "" +
-                            "setCookie('access_token', '" + BuildConfig.MAESTRO_TOKEN + "', 365);" +
-                            "setCookie('user_profile', '" + BuildConfig.MAESTRO_PROFILE+ "', 365);" +
-                            "setCookie('myClientName', '" + BuildConfig.MAESTRO_DEVICE_NAME +"', 365);" +
-                            "setCookie('remoteControl', 'true', 365);" +
-                            "window.location='/';" +
-                            "} else if (window.location.hash.indexOf('#/view?') == 0) {" +
-                            //"document.getElementsByTagName(\"video\")[0].play();" +
-                            "}" , null);
-                }
                 @TargetApi(android.os.Build.VERSION_CODES.M)
                 @Override
                 public void onReceivedError(WebView view, WebResourceRequest req, WebResourceError rerr) {
