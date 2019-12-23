@@ -69,7 +69,7 @@ public class UpdateCheck extends AsyncTask<Void, Void, Intent> {
             String PATH = Environment.getExternalStorageDirectory() + "/download/";
             File file = new File(PATH);
             file.mkdirs();
-            File outputFile = new File(file, "app.apk");
+            File outputFile = new File(file, "maestro-latest.apk");
             //activity.openFile
             FileOutputStream fos = new FileOutputStream(outputFile);
 

@@ -64,10 +64,10 @@ public class WebActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.REQUEST_INSTALL_PACKAGES)
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.REQUEST_INSTALL_PACKAGES},
+                    new String[]{Manifest.permission.REQUEST_INSTALL_PACKAGES, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     MY_PERMISSIONS_REQUEST_READ_CONTACTS);
 
         } else {
