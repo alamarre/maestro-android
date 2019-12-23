@@ -52,7 +52,7 @@ public class WebActivity extends Activity {
                 if(mWebview.canGoBack()) {
                     mWebview.goBack();
 
-                    handled = true;
+                    //handled = true;
                 }
                 break;
         }

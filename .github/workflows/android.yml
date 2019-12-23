@@ -33,7 +33,7 @@ jobs:
         run: ./gradlew assembleRelease && mv ./app/build/outputs/apk/release/app-release.apk ./fire-tv-maestro.apk
 
       - name: Upload for fire tv
-        run: aws s3 cp ${FILE} s3://${AWS_S3_BUCKET}/${FILE} --acl public-read --metadata maestro-version=1.5
+        run: aws s3 cp ${FILE} s3://${AWS_S3_BUCKET}/${FILE} --acl public-read --metadata maestro-version=1.6
         env:
           FILE: fire-tv-maestro.apk
           AWS_REGION: "us-east-1"
