@@ -8,6 +8,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+      - name: download secret key
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "us-west-1" # optional: defaults to us-east-1
+        run: aws s3 cp s3://${AWS_S3_BUCKET}/maestrokeys/maestrokeystore /home/runner/work/maestro-android/maestro-android/app/maestrokeystore --region ${AWS_REGION} $*
       - name: set up JDK 1.8
         uses: actions/setup-java@v1
         with:
@@ -19,12 +26,16 @@ jobs:
           ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Maestro Media Center"
           ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro"
           ORG_GRADLE_PROJECT_MAESTRO_PROFILE: '"Al"'
-        run: ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./fire-tv-maestro.apk
+          ORG_GRADLE_PROJECT_RELEASE_KEY_ALIAS: "maestrokey"
+          ORG_GRADLE_PROJECT_RELEASE_STORE_FILE: "maestrokeystore"
+          ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD: ${{ secrets.ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD: ${{ secrets.ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease && mv ./app/build/outputs/apk/release/app-release.apk ./fire-tv-maestro.apk
 
       - name: Upload for fire tv
         uses: tpaschalis/s3-sync-action@master
         with:
-          args: --acl public-read
+          args: --acl public-read --metadata maestro-version=1.2
         env:
           FILE: ./fire-tv-maestro.apk
           AWS_REGION: "us-east-1"
