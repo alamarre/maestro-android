@@ -1,8 +1,16 @@
 package ca.omny.videos.maestro;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebResourceError;
@@ -12,9 +20,19 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+
 public class WebActivity extends Activity {
 
     private WebView mWebview;
+    private final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 7000;
+    private final int MY_INSTALL_ID = 9001;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
@@ -44,6 +62,18 @@ public class WebActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.REQUEST_INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.REQUEST_INSTALL_PACKAGES},
+                    MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+
+        } else {
+            new UpdateCheck(this, MY_INSTALL_ID).execute();
+        }
+
         setContentView(R.layout.activity_web);
         mWebview = findViewById(R.id.webview1);
         if(mWebview != null) {
@@ -88,6 +118,35 @@ public class WebActivity extends Activity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    new UpdateCheck(this, MY_INSTALL_ID).execute();
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == MY_INSTALL_ID) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                System.out.println("excellent");
+            }
+        }
+    }
+
+            @Override
     protected void onDestroy() {
         super.onDestroy();
         if(mWebview != null) {
