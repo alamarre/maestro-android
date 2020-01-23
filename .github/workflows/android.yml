@@ -21,21 +21,36 @@ jobs:
           java-version: 1.8
       - name: Build for fire tv
         env:
-          ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.AL_MAESTRO_TOKEN) }}
-          ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"office-fire-tv"'
           ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Maestro Media Center"
           ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro"
-          ORG_GRADLE_PROJECT_MAESTRO_PROFILE: '"Al"'
           ORG_GRADLE_PROJECT_RELEASE_KEY_ALIAS: "maestrokey"
           ORG_GRADLE_PROJECT_RELEASE_STORE_FILE: "maestrokeystore"
           ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD: ${{ secrets.ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD }}
           ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD: ${{ secrets.ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD }}
         run: ./gradlew assembleRelease && mv ./app/build/outputs/apk/release/app-release.apk ./fire-tv-maestro.apk
+      - name: Secondary
+        env:
+          ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Secondary Maestro Media Center"
+          ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro.secondary"
+          ORG_GRADLE_PROJECT_RELEASE_KEY_ALIAS: "maestrokey"
+          ORG_GRADLE_PROJECT_RELEASE_STORE_FILE: "maestrokeystore"
+          ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD: ${{ secrets.ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD: ${{ secrets.ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease && mv ./app/build/outputs/apk/release/app-release.apk ./secondary-maestro.apk
 
       - name: Upload for fire tv
         run: aws s3 cp ${FILE} s3://${AWS_S3_BUCKET}/${FILE} --acl public-read --metadata maestro-version=1.7
         env:
           FILE: fire-tv-maestro.apk
+          AWS_REGION: "us-east-1"
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    
+      - name: Upload secondary
+        run: aws s3 cp ${FILE} s3://${AWS_S3_BUCKET}/${FILE} --acl public-read --metadata maestro-version=1.7
+        env:
+          FILE: secondary-maestro.apk
           AWS_REGION: "us-east-1"
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
