@@ -1,8 +1,17 @@
 package ca.omny.videos.maestro;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -11,12 +20,60 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+
 public class WebActivity extends Activity {
 
     private WebView mWebview;
+    private final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 7000;
+    private final int MY_INSTALL_ID = 9001;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+        boolean handled = false;
+
+        switch (keyCode){
+            case KeyEvent.KEYCODE_MENU:
+                // ... handle left action
+                mWebview.evaluateJavascript("var event = document.createEvent('Event');" +
+                                "event.initEvent('keydown', true, true);" +
+                                "event.keyCode = 77;" +
+                                "document.dispatchEvent(event);", null);
+                handled = true;
+                break;
+            case KeyEvent.KEYCODE_BACK:
+                // ... handle right action
+                if(mWebview.canGoBack()) {
+                    mWebview.goBack();
+
+                    handled = true;
+                }
+                break;
+        }
+        return handled || super.onKeyDown(keyCode, event);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.REQUEST_INSTALL_PACKAGES, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+
+        } else {
+            new UpdateCheck(this, MY_INSTALL_ID).execute();
+        }
+
         setContentView(R.layout.activity_web);
         mWebview = findViewById(R.id.webview1);
         if(mWebview != null) {
@@ -29,24 +86,6 @@ public class WebActivity extends Activity {
                 public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                     //Toast.makeText(activity, description, Toast.LENGTH_SHORT).show();
                 }*/
-                @Override
-                public void onPageFinished(WebView view, String url) {
-                    mWebview.evaluateJavascript("if(window.location.hash == '#/login') {" +
-                            "function setCookie(cname, cvalue, exdays) { " +
-                            "var d = new Date(); d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));" +
-                            "var expires = \"expires=\" + d.toGMTString();" +
-                            "document.cookie = cname + \"=\" + cvalue + \"; \" + expires;" +
-                            "}" +
-                            "" +
-                            "setCookie('access_token', '" + BuildConfig.MAESTRO_TOKEN + "', 365);" +
-                            "setCookie('user_profile', '" + BuildConfig.MAESTRO_PROFILE+ "', 365);" +
-                            "setCookie('myClientName', '" + BuildConfig.MAESTRO_DEVICE_NAME +"', 365);" +
-                            "setCookie('remoteControl', 'true', 365);" +
-                            "window.location='/';" +
-                            "} else if (window.location.hash.indexOf('#/view?') == 0) {" +
-                            //"document.getElementsByTagName(\"video\")[0].play();" +
-                            "}" , null);
-                }
                 @TargetApi(android.os.Build.VERSION_CODES.M)
                 @Override
                 public void onReceivedError(WebView view, WebResourceRequest req, WebResourceError rerr) {
@@ -79,6 +118,35 @@ public class WebActivity extends Activity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    new UpdateCheck(this, MY_INSTALL_ID).execute();
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == MY_INSTALL_ID) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                System.out.println("excellent");
+            }
+        }
+    }
+
+            @Override
     protected void onDestroy() {
         super.onDestroy();
         if(mWebview != null) {

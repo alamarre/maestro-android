@@ -8,177 +8,49 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+      - name: download secret key
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "us-west-1" # optional: defaults to us-east-1
+        run: aws s3 cp s3://${AWS_S3_BUCKET}/maestrokeys/maestrokeystore /home/runner/work/maestro-android/maestro-android/app/maestrokeystore --region ${AWS_REGION} $*
       - name: set up JDK 1.8
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Build for office
+      - name: Build for fire tv
         env:
-          ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.AL_MAESTRO_TOKEN) }}
-          ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"office-fire-tv"'
           ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Maestro Media Center"
           ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro"
-          ORG_GRADLE_PROJECT_MAESTRO_PROFILE: '"Al"'
-        run: ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./office-maestro.apk
-      - name: Build for living room
+          ORG_GRADLE_PROJECT_RELEASE_KEY_ALIAS: "maestrokey"
+          ORG_GRADLE_PROJECT_RELEASE_STORE_FILE: "maestrokeystore"
+          ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD: ${{ secrets.ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD: ${{ secrets.ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease && mv ./app/build/outputs/apk/release/app-release.apk ./fire-tv-maestro.apk
+      - name: Secondary
         env:
-          ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.AL_MAESTRO_TOKEN) }}
-          ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"living-room-fire-tv"'
-          ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Maestro Media Center"
-          ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro"
-          ORG_GRADLE_PROJECT_MAESTRO_PROFILE: '"Al"'
-        run: ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./living-room-maestro.apk
-      - name: Build for bedroom
-        env:
-          ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.AL_MAESTRO_TOKEN) }}
-          ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"fire-tv-auto"'
-          ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Maestro Media Center"
-          ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro"
-          ORG_GRADLE_PROJECT_MAESTRO_PROFILE: '"Al"'
-        run: ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./fire-tv-auto-maestro.apk
-      - name: Build for basement
-        env:
-          ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.AL_MAESTRO_TOKEN) }}
-          ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"ye-olde-fire-tv"'
-          ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Maestro Media Center"
-          ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro"
-          ORG_GRADLE_PROJECT_MAESTRO_PROFILE: '"Al"'
-        run: ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./ye-olde-fire-tv-maestro.apk
-      - name: Build for parents
-        env:
-          ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.PARENTS_MAESTRO_TOKEN) }}
-          ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"mom-fire-tv"'
-          ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Maestro Media Center"
-          ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro"
-          ORG_GRADLE_PROJECT_MAESTRO_PROFILE: '"Deb"'
-        run: ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./mom-fire-tv-maestro.apk
-      - name: Build for parents 2
-        env:
-          ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.PARENTS_MAESTRO_TOKEN) }}
-          ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"livingroom-fire-tv"'
-          ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Maestro Media Center"
-          ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro"
-          ORG_GRADLE_PROJECT_MAESTRO_PROFILE: '"Deb"'
-        run: ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./parents-fire-tv-maestro.apk
-      - name: Build for parents 3
-        env:
-          ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.PARENTS_MAESTRO_TOKEN) }}
-          ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"upstairs-livingroom-fire-tv"'
-          ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Maestro Media Center"
-          ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro"
-          ORG_GRADLE_PROJECT_MAESTRO_PROFILE: '"Deb"'
-        run: ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./parents-upstairs-fire-tv-maestro.apk
-      - name: Build for parents 4
-        env:
-          ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.PARENTS_MAESTRO_TOKEN) }}
-          ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"upstairs-livingroom-fire-tv"'
-          ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Maestro Media Center"
-          ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro"
-          ORG_GRADLE_PROJECT_MAESTRO_PROFILE: '"Deb"'
-        run: ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./dad-fire-tv-maestro.apk
-      - name: Build for Vuks
-        env:
-          ORG_GRADLE_PROJECT_MAESTRO_TOKEN: ${{ format('"{0}"', secrets.VUKS_MAESTRO_TOKEN) }}
-          ORG_GRADLE_PROJECT_MAESTRO_DEVICE_NAME: '"livingroom-fire-tv"'
-          ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Maestro Media Center"
-          ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro"
-          ORG_GRADLE_PROJECT_MAESTRO_PROFILE: '"Default"'
-        run: ./gradlew build && mv ./app/build/outputs/apk/debug/app-debug.apk ./vuks-fire-tv-maestro.apk
+          ORG_GRADLE_PROJECT_MAESTRO_APP_NAME: "Secondary Maestro Media Center"
+          ORG_GRADLE_PROJECT_MAESTRO_APP_ID: "ca.omny.videos.maestro.secondary"
+          ORG_GRADLE_PROJECT_RELEASE_KEY_ALIAS: "maestrokey"
+          ORG_GRADLE_PROJECT_RELEASE_STORE_FILE: "maestrokeystore"
+          ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD: ${{ secrets.ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD: ${{ secrets.ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease && mv ./app/build/outputs/apk/release/app-release.apk ./secondary-maestro.apk
 
-      - name: Upload for office
-        uses: tpaschalis/s3-sync-action@master
-        with:
-          args: --acl public-read
+      - name: Upload for fire tv
+        run: aws s3 cp ${FILE} s3://${AWS_S3_BUCKET}/${FILE} --acl public-read --metadata maestro-version=1.7
         env:
-          FILE: ./office-maestro.apk
+          FILE: fire-tv-maestro.apk
           AWS_REGION: "us-east-1"
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Upload for living room
-        uses: tpaschalis/s3-sync-action@master
-        with:
-          args: --acl public-read
+    
+      - name: Upload secondary
+        run: aws s3 cp ${FILE} s3://${AWS_S3_BUCKET}/${FILE} --acl public-read --metadata maestro-version=1.7
         env:
-          FILE: ./living-room-maestro.apk
-          AWS_REGION: "us-east-1"
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Upload for bedroom
-        uses: tpaschalis/s3-sync-action@master
-        with:
-          args: --acl public-read
-        env:
-          FILE: ./fire-tv-auto-maestro.apk
-          AWS_REGION: "us-east-1"
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Upload for basement
-        uses: tpaschalis/s3-sync-action@master
-        with:
-          args: --acl public-read
-        env:
-          FILE: ./ye-olde-fire-tv-maestro.apk
-          AWS_REGION: "us-east-1"
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Upload for parents
-        uses: tpaschalis/s3-sync-action@master
-        with:
-          args: --acl public-read
-        env:
-          FILE: ./mom-fire-tv-maestro.apk
-          AWS_REGION: "us-east-1"
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Upload for parents 2
-        uses: tpaschalis/s3-sync-action@master
-        with:
-          args: --acl public-read
-        env:
-          FILE: ./parents-fire-tv-maestro.apk
-          AWS_REGION: "us-east-1"
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Upload for parents 2
-        uses: tpaschalis/s3-sync-action@master
-        with:
-          args: --acl public-read
-        env:
-          FILE: ./parents-upstairs-fire-tv-maestro.apk
-          AWS_REGION: "us-east-1"
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Upload for parents 4
-        uses: tpaschalis/s3-sync-action@master
-        with:
-          args: --acl public-read
-        env:
-          FILE: ./dad-fire-tv-maestro.apk
-          AWS_REGION: "us-east-1"
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Upload for Vuks
-        uses: tpaschalis/s3-sync-action@master
-        with:
-          args: --acl public-read
-        env:
-          FILE: ./vuks-fire-tv-maestro.apk
+          FILE: secondary-maestro.apk
           AWS_REGION: "us-east-1"
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
