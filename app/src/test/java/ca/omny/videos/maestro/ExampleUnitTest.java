@@ -1,4 +1,4 @@
-package ca.omny.videos.maestroandroid;
+package ca.omny.videos.maestro;
 
 import org.junit.Test;
 

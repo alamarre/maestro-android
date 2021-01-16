@@ -13,6 +13,7 @@ android {
         buildConfigField "String", "MAESTRO_PROFILE", MAESTRO_PROFILE
         buildConfigField "String", "MAESTRO_TOKEN", MAESTRO_TOKEN
         buildConfigField "String", "MAESTRO_DEVICE_NAME", MAESTRO_DEVICE_NAME
+        buildConfigField "String", "MAESTRO_URL", MAESTRO_URL
 
         manifestPlaceholders = [appName: MAESTRO_APP_NAME]
     }

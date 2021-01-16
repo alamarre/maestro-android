@@ -1,9 +1,7 @@
-package ca.omny.videos.maestroandroid;
+package ca.omny.videos.maestro;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebResourceError;
@@ -26,11 +24,11 @@ public class WebActivity extends Activity {
             final Activity activity = this;
 
             mWebview.setWebViewClient(new WebViewClient() {
-                @SuppressWarnings("deprecation")
+                /*@SuppressWarnings("deprecation")
                 @Override
                 public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                    Toast.makeText(activity, description, Toast.LENGTH_SHORT).show();
-                }
+                    //Toast.makeText(activity, description, Toast.LENGTH_SHORT).show();
+                }*/
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     mWebview.evaluateJavascript("if(window.location.hash == '#/login') {" +
@@ -72,8 +70,8 @@ public class WebActivity extends Activity {
         mWebview.getSettings().setDatabaseEnabled(true);
         mWebview.getSettings().setAppCacheEnabled(true);
         mWebview.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        if(! "http://192.168.86.152:8081".equals(mWebview.getUrl())) {
-            mWebview.loadUrl("http://192.168.86.152:8081");
+        if(! BuildConfig.MAESTRO_URL.equals(mWebview.getUrl())) {
+            mWebview.loadUrl(BuildConfig.MAESTRO_URL);
         }
 
 
