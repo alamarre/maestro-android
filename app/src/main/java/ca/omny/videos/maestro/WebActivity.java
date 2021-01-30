@@ -9,8 +9,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebResourceError;
@@ -18,13 +16,24 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.MediaController;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import org.videolan.libvlc.LibVLC;
+import org.videolan.libvlc.Media;
+import org.videolan.libvlc.MediaPlayer;
+import org.videolan.libvlc.util.VLCVideoLayout;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +42,8 @@ public class WebActivity extends Activity {
     private WebView mWebview;
     private final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 7000;
     private final int MY_INSTALL_ID = 9001;
+    private LibVLC libVlc;
+    private MediaPlayer mMediaPlayer;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
@@ -59,6 +70,39 @@ public class WebActivity extends Activity {
         return handled || super.onKeyDown(keyCode, event);
     }
 
+    private void setupPlayer() {
+        ArrayList<String> params = new ArrayList<String>();
+        //params.add("--no-drop-late-frames");
+
+        //params.add("-vvv");
+        params.add("--no-drop-late-frames");
+        params.add("--no-skip-frames");
+        params.add("--rtsp-tcp");
+        params.add("-vvv");
+
+        libVlc = new LibVLC(this, params);
+        //setContentView(R.layout.vlc_video_layout);
+        mMediaPlayer = new MediaPlayer(libVlc);
+        View vlcView = findViewById(R.id.view_vlc_layout);
+        /*vlcView.setVisibility(View.GONE);
+        vlcView.setVisibility(View.INVISIBLE);*/
+        VLCVideoLayout vlcVideoLayout = (VLCVideoLayout)vlcView;
+        mMediaPlayer.attachViews(vlcVideoLayout, null, false, false);
+        try {
+
+           /* MediaController mediaController = new MediaController(this);
+            mediaController.setMediaPlayer(mMediaPlayer);*/
+
+            Uri sampleUri = Uri.parse("https://gladiator.omny.ca/videos/TV%20Shows/Futurama/Season%207/Futurama%20S07E23%20-%20Game%20Of%20Tones.mp4");
+            mMediaPlayer.play(sampleUri);
+
+            //setContentView(R.layout.vlc_video_layout);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,8 +117,13 @@ public class WebActivity extends Activity {
         } else {
             new UpdateCheck(this, MY_INSTALL_ID).execute();
         }
-
         setContentView(R.layout.activity_web);
+        if(true) {
+
+            setupPlayer();
+        }
+
+
         mWebview = findViewById(R.id.webview1);
         if(mWebview != null) {
 
@@ -112,6 +161,8 @@ public class WebActivity extends Activity {
         if(! BuildConfig.MAESTRO_URL.equals(mWebview.getUrl())) {
             mWebview.loadUrl(BuildConfig.MAESTRO_URL);
         }
+
+
 
 
         //setContentView(mWebview );

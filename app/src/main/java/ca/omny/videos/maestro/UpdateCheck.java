@@ -11,9 +11,8 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
+
+import androidx.core.content.FileProvider;
 
 import java.io.File;
 import java.io.FileOutputStream;
