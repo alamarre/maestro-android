@@ -3,64 +3,69 @@ package ca.omny.videos.maestro;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.PixelFormat;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PowerManager;
+import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.MediaController;
-import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
-import org.videolan.libvlc.LibVLC;
-import org.videolan.libvlc.Media;
-import org.videolan.libvlc.MediaPlayer;
-import org.videolan.libvlc.util.VLCVideoLayout;
+
+import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+
+import ca.omny.videos.maestro.models.PlayVideo;
 
 public class WebActivity extends Activity {
 
     private WebView mWebview;
     private final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 7000;
+    private final int MY_PERMISSIONS_POWER = 7001;
     private final int MY_INSTALL_ID = 9001;
-    private LibVLC libVlc;
-    private MediaPlayer mMediaPlayer;
+    private Overlay mOverlay;
+    private Gson gson = new Gson();
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event){
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean handled = false;
 
-        switch (keyCode){
+        switch (keyCode) {
             case KeyEvent.KEYCODE_MENU:
                 // ... handle left action
                 mWebview.evaluateJavascript("var event = document.createEvent('Event');" +
-                                "event.initEvent('keydown', true, true);" +
-                                "event.keyCode = 77;" +
-                                "document.dispatchEvent(event);", null);
+                        "event.initEvent('keydown', true, true);" +
+                        "event.keyCode = 77;" +
+                        "document.dispatchEvent(event);", null);
                 handled = true;
                 break;
             case KeyEvent.KEYCODE_BACK:
                 // ... handle right action
-                if(mWebview.canGoBack()) {
+                if (mWebview.canGoBack()) {
                     mWebview.goBack();
 
                     handled = true;
@@ -70,37 +75,63 @@ public class WebActivity extends Activity {
         return handled || super.onKeyDown(keyCode, event);
     }
 
-    private void setupPlayer() {
-        ArrayList<String> params = new ArrayList<String>();
-        //params.add("--no-drop-late-frames");
+    private void setupOverlay() {
+        WindowManager windowManager = (WindowManager) getBaseContext().getSystemService(Context.WINDOW_SERVICE);
+        mOverlay = new Overlay(getBaseContext());
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.FIRST_SUB_WINDOW);
+        DisplayMetrics metrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getRealMetrics(metrics);
+        layoutParams.width = metrics.widthPixels;
+        layoutParams.height = metrics.heightPixels;
 
-        //params.add("-vvv");
-        params.add("--no-drop-late-frames");
-        params.add("--no-skip-frames");
-        params.add("--rtsp-tcp");
-        params.add("-vvv");
+        layoutParams.format = PixelFormat.RGBA_8888;
+        layoutParams.flags =
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+        //layoutParams.token = getWindow().getDecorView().getRootView().getWindowToken();
 
-        libVlc = new LibVLC(this, params);
-        //setContentView(R.layout.vlc_video_layout);
-        mMediaPlayer = new MediaPlayer(libVlc);
-        View vlcView = findViewById(R.id.view_vlc_layout);
-        /*vlcView.setVisibility(View.GONE);
-        vlcView.setVisibility(View.INVISIBLE);*/
-        VLCVideoLayout vlcVideoLayout = (VLCVideoLayout)vlcView;
-        mMediaPlayer.attachViews(vlcVideoLayout, null, false, false);
-        try {
+        //Feel free to inflate here
 
-           /* MediaController mediaController = new MediaController(this);
-            mediaController.setMediaPlayer(mMediaPlayer);*/
+        //mTestView.setBackgroundColor(Color.RED);
 
-            Uri sampleUri = Uri.parse("https://gladiator.omny.ca/videos/TV%20Shows/Futurama/Season%207/Futurama%20S07E23%20-%20Game%20Of%20Tones.mp4");
-            mMediaPlayer.play(sampleUri);
+        //Must wire up back button, otherwise it's not sent to our activity
+        mOverlay.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    onBackPressed();
+                }
+                return true;
+            }
+        });
+        windowManager.addView(mOverlay, layoutParams);
+    }
 
-            //setContentView(R.layout.vlc_video_layout);
-        } catch (Exception e) {
-            e.printStackTrace();
+    public void askPermission(Activity context){
+        boolean permission;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            permission = Settings.System.canWrite(context);
+        } else {
+            permission = ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_SETTINGS) == PackageManager.PERMISSION_GRANTED;
         }
+        if (permission) {
+            //do your code
+            Settings.System.putInt(this.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 1);
+        }  else {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                intent.setData(Uri.parse("package:" + context.getPackageName()));
+                context.startActivityForResult(intent, 1000);
+            } else {
+                ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.WRITE_SETTINGS}, 1000);
+            }
+        }
+    }
 
+    @JavascriptInterface
+    public void showVideo(String json) {
+        PlayVideo videoToPlay = gson.fromJson(json, PlayVideo.class);
+        new StartVlcVideo(this, videoToPlay).execute();
     }
 
     @Override
@@ -117,12 +148,13 @@ public class WebActivity extends Activity {
         } else {
             new UpdateCheck(this, MY_INSTALL_ID).execute();
         }
+
+
+
+        //askPermission(this);
+        //Settings.System.putInt(this.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 1);
         setContentView(R.layout.activity_web);
-        if(true) {
-
-            setupPlayer();
-        }
-
+        mOverlay = new Overlay(this);
 
         mWebview = findViewById(R.id.webview1);
         if(mWebview != null) {
@@ -163,7 +195,33 @@ public class WebActivity extends Activity {
         }
 
 
+        if(true) {
 
+            //setupOverlay();
+
+            //setupPlayer();
+            /*String path = "https://videos.al.workers.dev/videos/lamarre-videos/noisemaker.mp4?video=https%3A%2F%2Ff000.backblazeb2.com%2Ffile%2Flamarre-videos%2Fnoisemaker.mp4&downloadToken=3_20210130181119_f5ba28e9971887661e9eceab_0044a77055f1a11a2f99b98ceb1662aa2a56e3ad_000_20210206181119_0000_dnld";
+            String vttPath = "https://gladiator.omny.ca/videos/Movies2/Black%20Panther.vtt";
+            PlayVideo videoToPlay = new PlayVideo("Test", new String[] {path}, new String[] {vttPath}, , 0)
+            */
+
+            /*addContentView(mOverlay, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            mOverlay.bringToFront();*/
+            //return;
+        }
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WAKE_LOCK)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WAKE_LOCK},
+                    MY_PERMISSIONS_POWER);
+
+        } else {
+            PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            PowerManager.WakeLock lock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"maestro:lock");
+            lock.acquire();
+        }
 
         //setContentView(mWebview );
     }
@@ -183,6 +241,19 @@ public class WebActivity extends Activity {
                 }
                 return;
             }
+            case MY_PERMISSIONS_POWER: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                    PowerManager.WakeLock lock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK,"maestro:lock");
+                    lock.acquire();
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
         }
     }
 
@@ -194,7 +265,22 @@ public class WebActivity extends Activity {
             if (resultCode == RESULT_OK) {
                 System.out.println("excellent");
             }
+        } else if (requestCode == 42) {
+            try {
+                long position = (long) data.getExtras().get("extra_position");
+                long duration = (long) data.getExtras().get("extra_duration");
+                System.out.println(position);
+                System.out.println(duration);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
+
+        WindowManager windowManager = (WindowManager) getBaseContext().getSystemService(Context.WINDOW_SERVICE);
+
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.FIRST_SUB_WINDOW);
+        layoutParams.screenBrightness = 0;
+        getWindow().setAttributes(layoutParams);
     }
 
             @Override
