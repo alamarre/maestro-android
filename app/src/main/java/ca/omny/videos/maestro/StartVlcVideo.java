@@ -1,6 +1,7 @@
 package ca.omny.videos.maestro;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -81,7 +82,7 @@ public class StartVlcVideo extends AsyncTask<Void, Void, Void> {
         }
 
         // vlcIntent.setComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.tv.audioplayer.AudioPlayerActivity"));
-        //vlcIntent.setComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.video.VideoPlayerActivity"));
+        vlcIntent.setComponent(new ComponentName("org.videolan.vlc", "org.videolan.vlc.gui.video.VideoPlayerActivity"));
         activity.startActivityForResult(vlcIntent, vlcRequestCode);
         return null;
     }

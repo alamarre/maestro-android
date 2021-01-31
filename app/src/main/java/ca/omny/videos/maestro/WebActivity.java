@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import ca.omny.videos.maestro.models.PlayResult;
 import ca.omny.videos.maestro.models.PlayVideo;
 
 public class WebActivity extends Activity {
@@ -128,6 +129,20 @@ public class WebActivity extends Activity {
         }
     }
 
+    // from https://stackoverflow.com/questions/18752202/check-if-application-is-installed-android (Robin Kanters)
+    private boolean isPackageInstalled(String packageName, PackageManager packageManager) {
+        try {
+            packageManager.getPackageInfo(packageName, 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private boolean isVlcInstalled() {
+        return isPackageInstalled("org.videolan.vlc", this.getPackageManager());
+    }
+
     @JavascriptInterface
     public void showVideo(String json) {
         PlayVideo videoToPlay = gson.fromJson(json, PlayVideo.class);
@@ -148,8 +163,6 @@ public class WebActivity extends Activity {
         } else {
             new UpdateCheck(this, MY_INSTALL_ID).execute();
         }
-
-
 
         //askPermission(this);
         //Settings.System.putInt(this.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 1);
@@ -190,6 +203,9 @@ public class WebActivity extends Activity {
         mWebview.getSettings().setDatabaseEnabled(true);
         mWebview.getSettings().setAppCacheEnabled(true);
         mWebview.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        if(isVlcInstalled()) {
+            mWebview.addJavascriptInterface(this, "MaestroNative");
+        }
         if(! BuildConfig.MAESTRO_URL.equals(mWebview.getUrl())) {
             mWebview.loadUrl(BuildConfig.MAESTRO_URL);
         }
@@ -267,20 +283,24 @@ public class WebActivity extends Activity {
             }
         } else if (requestCode == 42) {
             try {
+                if(data == null) {
+                    return;
+                }
                 long position = (long) data.getExtras().get("extra_position");
                 long duration = (long) data.getExtras().get("extra_duration");
                 System.out.println(position);
                 System.out.println(duration);
+                PlayResult playResult = new PlayResult();
+                playResult.duration = duration;
+                playResult.progress = position;
+                String jsonPlayResult = gson.toJson(playResult);
+                mWebview.evaluateJavascript(
+                        "var event = new CustomEvent('stopped-playing', {detail: " + jsonPlayResult + "} );" +
+                        "document.dispatchEvent(event);", null);
             } catch(Exception e) {
                 e.printStackTrace();
             }
         }
-
-        WindowManager windowManager = (WindowManager) getBaseContext().getSystemService(Context.WINDOW_SERVICE);
-
-        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.FIRST_SUB_WINDOW);
-        layoutParams.screenBrightness = 0;
-        getWindow().setAttributes(layoutParams);
     }
 
             @Override
