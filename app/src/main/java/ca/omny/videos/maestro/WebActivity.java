@@ -210,22 +210,6 @@ public class WebActivity extends Activity {
             mWebview.loadUrl(BuildConfig.MAESTRO_URL);
         }
 
-
-        if(true) {
-
-            //setupOverlay();
-
-            //setupPlayer();
-            /*String path = "https://videos.al.workers.dev/videos/lamarre-videos/noisemaker.mp4?video=https%3A%2F%2Ff000.backblazeb2.com%2Ffile%2Flamarre-videos%2Fnoisemaker.mp4&downloadToken=3_20210130181119_f5ba28e9971887661e9eceab_0044a77055f1a11a2f99b98ceb1662aa2a56e3ad_000_20210206181119_0000_dnld";
-            String vttPath = "https://gladiator.omny.ca/videos/Movies2/Black%20Panther.vtt";
-            PlayVideo videoToPlay = new PlayVideo("Test", new String[] {path}, new String[] {vttPath}, , 0)
-            */
-
-            /*addContentView(mOverlay, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            mOverlay.bringToFront();*/
-            //return;
-        }
-
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WAKE_LOCK)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -240,6 +224,12 @@ public class WebActivity extends Activity {
         }
 
         //setContentView(mWebview );
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mWebview.loadUrl(BuildConfig.MAESTRO_URL);
     }
 
     @Override
@@ -303,7 +293,7 @@ public class WebActivity extends Activity {
         }
     }
 
-            @Override
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         if(mWebview != null) {
