@@ -39,7 +39,8 @@ jobs:
         run: ./gradlew assembleRelease && mv ./app/build/outputs/apk/release/app-release.apk ./secondary-maestro.apk
 
       - name: Upload for fire tv
-        run: aws s3 cp ${FILE} s3://${AWS_S3_BUCKET}/${FILE} --acl public-read --metadata maestro-version=1.9
+        run: aws s3 cp ${FILE} s3://${AWS_S3_BUCKET}/${FILE} --acl 
+public-read --metadata maestro-version=1.10
         env:
           FILE: fire-tv-maestro.apk
           AWS_REGION: "us-east-1"
@@ -48,7 +49,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     
       - name: Upload secondary
-        run: aws s3 cp ${FILE} s3://${AWS_S3_BUCKET}/${FILE} --acl public-read --metadata maestro-version=1.9
+        run: aws s3 cp ${FILE} s3://${AWS_S3_BUCKET}/${FILE} --acl 
+public-read --metadata maestro-version=1.10
         env:
           FILE: secondary-maestro.apk
           AWS_REGION: "us-east-1"

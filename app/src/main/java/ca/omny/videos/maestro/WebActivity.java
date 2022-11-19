@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Build;
@@ -170,6 +171,7 @@ public class WebActivity extends Activity {
         mOverlay = new Overlay(this);
 
         mWebview = findViewById(R.id.webview1);
+
         if(mWebview != null) {
 
             final Activity activity = this;
@@ -199,10 +201,12 @@ public class WebActivity extends Activity {
         mWebview.getSettings().setBlockNetworkImage(false);
         mWebview.getSettings().setAllowContentAccess(true);
         mWebview.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        //
         mWebview.getSettings().setDomStorageEnabled(true);
         mWebview.getSettings().setDatabaseEnabled(true);
         mWebview.getSettings().setAppCacheEnabled(true);
         mWebview.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        mWebview.setBackgroundColor(Color.BLACK);
         if(isVlcInstalled()) {
             mWebview.addJavascriptInterface(this, "MaestroNative");
         }
@@ -229,6 +233,7 @@ public class WebActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+
         mWebview.loadUrl(BuildConfig.MAESTRO_URL);
     }
 
